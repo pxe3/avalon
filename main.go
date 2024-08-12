@@ -111,6 +111,17 @@ func (l *Lexer) readChar() {
 	l.readPosition++
 }
 
+func (l *Lexer) readString() string {
+	position := l.position + 1
+	for {
+		l.readChar()
+		if l.ch == '"' || l.ch == 0 {
+			break
+		}
+	}
+	return l.input[position:l.position]
+}
+
 func (l *Lexer) NextToken() Token {
 	var tok Token
 	l.skipWhitespace()
@@ -120,6 +131,8 @@ func (l *Lexer) NextToken() Token {
 		tok = newToken(TOKEN_ASSIGN, l.ch)
 	case ';':
 		tok = newToken(TOKEN_SEMICOLON, l.ch)
+	case ':':
+		tok = newToken(TOKEN_COLON, l.ch)
 	case '(':
 		tok = newToken(TOKEN_LPAREN, l.ch)
 	case ')':
@@ -132,6 +145,10 @@ func (l *Lexer) NextToken() Token {
 		tok = newToken(TOKEN_LBRACE, l.ch)
 	case '}':
 		tok = newToken(TOKEN_RBRACE, l.ch)
+	case '"':
+		tok.Type = TOKEN_STRING
+		tok.Value = l.readString()
+		return tok
 	case 0:
 		tok.Value = ""
 		tok.Type = TOKEN_EOF
